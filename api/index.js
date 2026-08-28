@@ -64,7 +64,7 @@ app.post('/api/amprem', async (req, res) => {
         });
 
         const data = await response.json();
-        console.log(`Alight Response [${action}]:`, data);
+        console.log(`Alight Response [${action}]:`, JSON.stringify(data).substring(0, 200));
 
         // Teruskan response ke frontend
         res.json(data);
