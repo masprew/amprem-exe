@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alight Motion Premium Generator</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="logo">
+            <svg viewBox="0 0 24 24" width="40" height="40" fill="white">
+                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+            </svg>
+        </div>
+        
+        <h1>Alight Motion Premium</h1>
+        <p class="subtitle">Generator Premium Access</p>
+
+        <div class="steps">
+            <div class="step active" id="step1">1. Email</div>
+            <div class="step" id="step2">2. Verifikasi</div>
+            <div class="step" id="step3">3. Premium</div>
+        </div>
+
+        <form id="generatorForm">
+            <!-- Step 1: Email -->
+            <div class="form-step" id="formStep1">
+                <label for="email">Alamat Email</label>
+                <input type="email" id="email" placeholder="Masukkan email Anda" required>
+                <button type="button" class="btn" onclick="sendMagicLink()">
+                    Kirim Magic Link
+                </button>
+            </div>
+
+            <!-- Step 2: Verifikasi -->
+            <div class="form-step" id="formStep2" style="display:none;">
+                <label for="token">Token Verifikasi</label>
+                <input type="text" id="token" placeholder="Masukkan token dari email">
+                <small style="color:#636e72;">Token akan muncul di console/server</small>
+                <button type="button" class="btn" onclick="verifyAccount()">
+                    Verifikasi Akun
+                </button>
+            </div>
+
+            <!-- Step 3: Premium -->
+            <div class="form-step" id="formStep3" style="display:none;">
+                <div class="success-icon">✅</div>
+                <h2>Verifikasi Berhasil!</h2>
+                <p>Klik tombol di bawah untuk mengaktifkan premium</p>
+                <button type="button" class="btn" onclick="applyPremium()">
+                    Aktifkan Premium
+                </button>
+            </div>
+        </form>
+
+        <div id="statusBox" class="status-box"></div>
+        <div id="resultBox" class="result-box"></div>
+
+        <div class="footer">
+            <p>&copy; 2024 AMPrem Generator</p>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

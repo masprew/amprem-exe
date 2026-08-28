@@ -1,0 +1,228 @@
+:root {
+    --primary: #6c5ce7;
+    --secondary: #a29bfe;
+    --success: #00b894;
+    --error: #d63031;
+    --bg: #0a0a0a;
+    --card-bg: #1a1a2e;
+    --text: #ffffff;
+    --text-secondary: #b2bec3;
+    --border: #2d3436;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', sans-serif;
+    background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    color: var(--text);
+}
+
+.container {
+    background: var(--card-bg);
+    border-radius: 20px;
+    padding: 30px;
+    width: 100%;
+    max-width: 450px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    border: 1px solid var(--border);
+}
+
+.logo {
+    width: 70px;
+    height: 70px;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 15px;
+}
+
+h1 {
+    text-align: center;
+    font-size: 1.5rem;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 5px;
+}
+
+.subtitle {
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    margin-bottom: 25px;
+}
+
+.steps {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 25px;
+    gap: 5px;
+}
+
+.step {
+    flex: 1;
+    text-align: center;
+    font-size: 0.7rem;
+    padding: 8px 5px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 8px;
+    color: var(--text-secondary);
+    border: 1px solid var(--border);
+    transition: all 0.3s;
+}
+
+.step.active {
+    background: rgba(108,92,231,0.2);
+    color: var(--primary);
+    border-color: var(--primary);
+}
+
+.step.completed {
+    background: rgba(0,184,148,0.2);
+    color: var(--success);
+    border-color: var(--success);
+}
+
+.form-step {
+    margin-bottom: 15px;
+}
+
+label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+input {
+    width: 100%;
+    padding: 12px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text);
+    font-size: 0.95rem;
+    margin-bottom: 15px;
+    transition: all 0.3s;
+}
+
+input:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(108,92,231,0.2);
+}
+
+.btn {
+    width: 100%;
+    padding: 13px;
+    background: linear-gradient(135deg, var(--primary), #4834d4);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(108,92,231,0.3);
+}
+
+.btn:active {
+    transform: translateY(0);
+}
+
+.btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.status-box, .result-box {
+    display: none;
+    padding: 15px;
+    border-radius: 10px;
+    margin-top: 15px;
+    font-size: 0.9rem;
+    animation: fadeIn 0.3s;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.status-box.success {
+    display: block;
+    background: rgba(0,184,148,0.1);
+    border: 1px solid var(--success);
+    color: #55efc4;
+}
+
+.status-box.error {
+    display: block;
+    background: rgba(214,48,49,0.1);
+    border: 1px solid var(--error);
+    color: #ff7675;
+}
+
+.status-box.info {
+    display: block;
+    background: rgba(108,92,231,0.1);
+    border: 1px solid var(--primary);
+    color: var(--secondary);
+}
+
+.result-box {
+    display: block;
+    background: rgba(0,0,0,0.3);
+    border: 1px solid var(--border);
+    padding: 15px;
+    margin-top: 15px;
+    border-radius: 10px;
+    font-family: monospace;
+    font-size: 0.8rem;
+    white-space: pre-wrap;
+    word-break: break-all;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.success-icon {
+    font-size: 3rem;
+    text-align: center;
+    margin-bottom: 15px;
+}
+
+.form-step h2 {
+    text-align: center;
+    margin-bottom: 10px;
+    color: var(--success);
+}
+
+.form-step p {
+    text-align: center;
+    color: var(--text-secondary);
+    margin-bottom: 20px;
+    font-size: 0.9rem;
+}
+
+.footer {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 0.75rem;
+    color: #636e72;
+}
