@@ -2,6 +2,14 @@ const express = require('express');
 const cors = require('cors');
 const app = express();
 
+// ===== TAMBAHKAN DI SINI =====
+const { createClient } = require('@supabase/supabase-js');
+
+const supabaseUrl = 'https://ebvnnpqhtbcghdroubec.supabase.co';
+const supabaseKey = 'sb_publishable_N6ISyGVHxGaxQXksf46DCw_uLPbvc8T';
+const supabase = createClient(supabaseUrl, supabaseKey);
+// ============================
+
 app.use(cors());
 app.use(express.json());
 
