@@ -7,6 +7,17 @@ let userIdToken = '';
 let selectedServer = null;
 let serversData = [];
 
+// ============ SVG ICONS ============
+const SVG_ICONS = {
+    error: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ff7675" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>',
+    success: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#55efc4" stroke-width="2" stroke-linecap="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>',
+    warning: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fdcb6e" stroke-width="2" stroke-linecap="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>',
+    info: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#74b9ff" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>',
+    close: '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>',
+    active: '<svg width="10" height="10" viewBox="0 0 24 24" fill="#00b894"><circle cx="12" cy="12" r="10"></circle></svg>',
+    exhausted: '<svg width="10" height="10" viewBox="0 0 24 24" fill="#d63031"><circle cx="12" cy="12" r="10"></circle></svg>'
+};
+
 // ============ NOTIFIKASI ============
 function showNotification(message, type = 'error') {
     const oldNotif = document.getElementById('notification');
@@ -16,18 +27,11 @@ function showNotification(message, type = 'error') {
     notif.id = 'notification';
     notif.className = 'notification ' + type;
     
-    const icons = {
-        error: '❌',
-        success: '✅',
-        warning: '⚠️',
-        info: 'ℹ️'
-    };
-    
     notif.innerHTML = `
         <div class="notification-content">
-            <span class="notification-icon">${icons[type] || 'ℹ️'}</span>
+            <span class="notification-icon">${SVG_ICONS[type] || SVG_ICONS.info}</span>
             <span class="notification-message">${message}</span>
-            <button class="notification-close" onclick="this.parentElement.parentElement.remove()">✕</button>
+            <button class="notification-close" onclick="this.parentElement.parentElement.remove()">${SVG_ICONS.close}</button>
         </div>
     `;
     
@@ -76,6 +80,8 @@ function renderServerList(servers) {
     
     servers.forEach(server => {
         const percentage = server.percentage || 0;
+        const statusIcon = server.status === 'active' ? SVG_ICONS.active : SVG_ICONS.exhausted;
+        const statusText = server.status === 'active' ? 'Aktif' : 'Habis';
         const statusColor = server.status === 'active' ? '#00b894' : '#d63031';
         
         html += `
@@ -90,7 +96,9 @@ function renderServerList(servers) {
                 <div class="quota-text">
                     API: ${server.remainingApi}/${server.limitApi} | Akun: ${server.remainingAccounts}/${server.limitAccounts}
                     <br>
-                    <span style="color: ${statusColor};">${server.status === 'active' ? '🟢 Aktif' : '🔴 Habis'}</span>
+                    <span style="color: ${statusColor}; display: inline-flex; align-items: center; gap: 5px;">
+                        ${statusIcon} ${statusText}
+                    </span>
                 </div>
             </div>
         `;
@@ -132,18 +140,39 @@ function applyTheme(theme) {
     });
 }
 
+// ============ SHOW STATUS ============
+function showStatus(message, type) {
+    const statusBox = document.getElementById('statusBox');
+    statusBox.className = 'status-box ' + type;
+    
+    let icon = '';
+    if (type === 'success') icon = SVG_ICONS.success;
+    else if (type === 'error') icon = SVG_ICONS.error;
+    else if (type === 'info') icon = SVG_ICONS.info;
+    else icon = SVG_ICONS.warning;
+    
+    statusBox.innerHTML = `<span style="display: inline-flex; align-items: center; gap: 8px;">${icon} ${message}</span>`;
+}
+
+// ============ SHOW RESULT ============
+function showResult(data) {
+    const resultBox = document.getElementById('resultBox');
+    resultBox.style.display = 'block';
+    resultBox.textContent = JSON.stringify(data, null, 2);
+}
+
 // ============ SEND MAGIC LINK ============
 async function sendMagicLink() {
     const email = document.getElementById('email').value.trim();
     
     if (!email) {
-        showStatus('❌ Masukkan email dulu!', 'error');
+        showStatus('Masukkan email dulu!', 'error');
         showNotification('Email tidak boleh kosong!', 'warning');
         return;
     }
     
     userEmail = email;
-    showStatus('⏳ Mengirim magic link...', 'info');
+    showStatus('Mengirim magic link...', 'info');
     
     try {
         const response = await fetch(API_URL, {
@@ -160,7 +189,7 @@ async function sendMagicLink() {
         console.log('Response:', data);
         
         if (data.success) {
-            showStatus('✅ Magic link dikirim! Cek email Anda.', 'success');
+            showStatus('Magic link dikirim! Cek email Anda.', 'success');
             showNotification('Magic link berhasil dikirim!', 'success');
             showResult(data);
             
@@ -170,11 +199,11 @@ async function sendMagicLink() {
             document.getElementById('formStep1').style.display = 'none';
             document.getElementById('formStep2').style.display = 'block';
         } else {
-            showStatus('❌ ' + (data.message || 'Gagal!'), 'error');
+            showStatus(data.message || 'Gagal!', 'error');
             showNotification('Gagal: ' + (data.message || 'Unknown error'), 'error');
         }
     } catch (error) {
-        showStatus('❌ Error: ' + error.message, 'error');
+        showStatus(error.message, 'error');
         showNotification('Network error: ' + error.message, 'error');
     }
     
@@ -186,12 +215,12 @@ async function verifyAccount() {
     const token = document.getElementById('token').value.trim();
     
     if (!token) {
-        showStatus('❌ Masukkan magic link!', 'error');
+        showStatus('Masukkan magic link!', 'error');
         showNotification('Magic link tidak boleh kosong!', 'warning');
         return;
     }
     
-    showStatus('⏳ Memverifikasi...', 'info');
+    showStatus('Memverifikasi...', 'info');
     
     try {
         const response = await fetch(API_URL, {
@@ -210,7 +239,7 @@ async function verifyAccount() {
         
         if (data.success && data.idToken) {
             userIdToken = data.idToken;
-            showStatus('✅ Verifikasi berhasil!', 'success');
+            showStatus('Verifikasi berhasil!', 'success');
             showNotification('Verifikasi berhasil!', 'success');
             showResult(data);
             
@@ -220,11 +249,11 @@ async function verifyAccount() {
             document.getElementById('formStep2').style.display = 'none';
             document.getElementById('formStep3').style.display = 'block';
         } else {
-            showStatus('❌ ' + (data.message || 'Verifikasi gagal!'), 'error');
+            showStatus(data.message || 'Verifikasi gagal!', 'error');
             showNotification('Verifikasi gagal: ' + (data.message || 'Token invalid'), 'error');
         }
     } catch (error) {
-        showStatus('❌ Error: ' + error.message, 'error');
+        showStatus(error.message, 'error');
         showNotification('Network error: ' + error.message, 'error');
     }
     
@@ -233,7 +262,7 @@ async function verifyAccount() {
 
 // ============ APPLY PREMIUM ============
 async function applyPremium() {
-    showStatus('⏳ Mengaktifkan premium...', 'info');
+    showStatus('Mengaktifkan premium...', 'info');
     
     try {
         const response = await fetch(API_URL, {
@@ -251,33 +280,19 @@ async function applyPremium() {
         console.log('Response:', data);
         
         if (data.success) {
-            showStatus('🎉 Premium berhasil diaktifkan!', 'success');
-            showNotification('Premium berhasil diaktifkan! 🎉', 'success');
+            showStatus('Premium berhasil diaktifkan!', 'success');
+            showNotification('Premium berhasil diaktifkan!', 'success');
             showResult(data);
         } else {
-            showStatus('❌ ' + (data.message || 'Aktivasi gagal!'), 'error');
+            showStatus(data.message || 'Aktivasi gagal!', 'error');
             showNotification('Aktivasi gagal: ' + (data.message || 'Unknown error'), 'error');
         }
     } catch (error) {
-        showStatus('❌ Error: ' + error.message, 'error');
+        showStatus(error.message, 'error');
         showNotification('Network error: ' + error.message, 'error');
     }
     
     loadQuota();
-}
-
-// ============ SHOW STATUS ============
-function showStatus(message, type) {
-    const statusBox = document.getElementById('statusBox');
-    statusBox.className = 'status-box ' + type;
-    statusBox.innerHTML = message;
-}
-
-// ============ SHOW RESULT ============
-function showResult(data) {
-    const resultBox = document.getElementById('resultBox');
-    resultBox.style.display = 'block';
-    resultBox.textContent = JSON.stringify(data, null, 2);
 }
 
 // ============ INIT ============
