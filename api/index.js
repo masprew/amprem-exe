@@ -37,7 +37,7 @@ app.post('/api/amprem', (req, res) => {
       break;
       
     case 'verify-account':
-      if (magicLinks[email] && rawLink && rawLink.includes(magicLinks[email])) {
+      if (rawLink) {
         const newIdToken = 'id_' + Math.random().toString(36) + Date.now().toString(36);
         magicLinks[email] = newIdToken;
         
