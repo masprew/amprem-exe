@@ -1,5 +1,5 @@
 // Ganti dengan URL Vercel kamu nanti
-const API_URL = 'https://anita-studio.netlify.app/.netlify/functions/amprem';
+const API_URL = 'https://amprem-exe.vercel.app/api/amprem';
 // Contoh: https://project-kamu.vercel.app/api/amprem
 
 let currentStep = 1;
