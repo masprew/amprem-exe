@@ -2,7 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const app = express();
 
-// ===== TAMBAHKAN DI SINI =====
+// ===== SUPABASE =====
 const { createClient } = require('@supabase/supabase-js');
 
 const supabaseUrl = 'https://ebvnnpqhtbcghdroubec.supabase.co';
@@ -79,22 +79,50 @@ const SERVERS = [
     }
 ];
 
-// Fungsi pilih server dengan kuota terbanyak
-function getBestServer() {
-    const activeServers = SERVERS.filter(s => s.quota.remainingApi > 0);
-    if (activeServers.length === 0) return null;
+// ============================================
+// FUNGSI DATABASE
+// ============================================
+
+// Ambil semua kuota dari database
+async function loadQuotaFromDB() {
+    const { data, error } = await supabase
+        .from('server_quota')
+        .select('*')
+        .order('server_id');
     
-    // Pilih yang paling banyak sisa kuota
-    return activeServers.sort((a, b) => b.quota.remainingApi - a.quota.remainingApi)[0];
+    if (!error && data) {
+        data.forEach(dbServer => {
+            const server = SERVERS.find(s => s.id === dbServer.server_id);
+            if (server) {
+                server.quota.usedApi = dbServer.used_api || 0;
+                server.quota.limitApi = dbServer.limit_api || 45;
+                server.quota.remainingApi = dbServer.remaining_api || 45;
+                server.quota.usedAccounts = dbServer.used_accounts || 0;
+                server.quota.limitAccounts = dbServer.limit_accounts || 15;
+                server.quota.remainingAccounts = dbServer.remaining_accounts || 15;
+            }
+        });
+    }
 }
 
-// Fungsi pilih server by ID
-function getServerById(id) {
-    return SERVERS.find(s => s.id === parseInt(id));
+// Update kuota di database
+async function updateQuotaInDB(server) {
+    await supabase
+        .from('server_quota')
+        .update({
+            used_api: server.quota.usedApi,
+            limit_api: server.quota.limitApi,
+            remaining_api: server.quota.remainingApi,
+            used_accounts: server.quota.usedAccounts,
+            limit_accounts: server.quota.limitAccounts,
+            remaining_accounts: server.quota.remainingAccounts,
+            updated_at: new Date()
+        })
+        .eq('server_id', server.id);
 }
 
-// Update kuota dari response
-function updateQuota(server, apiResponse) {
+// Update kuota dari response API
+async function updateQuota(server, apiResponse) {
     if (apiResponse && apiResponse.quota) {
         server.quota.usedApi = apiResponse.quota.usedApiToday || 0;
         server.quota.limitApi = apiResponse.quota.limitApiToday || 45;
@@ -102,15 +130,37 @@ function updateQuota(server, apiResponse) {
         server.quota.usedAccounts = apiResponse.quota.usedAccountsToday || 0;
         server.quota.limitAccounts = apiResponse.quota.limitAccountsToday || 15;
         server.quota.remainingAccounts = (server.quota.limitAccounts - server.quota.usedAccounts) || 0;
+        
+        // Simpan ke database
+        await updateQuotaInDB(server);
     }
 }
 
+// Fungsi pilih server dengan kuota terbanyak
+async function getBestServer() {
+    await loadQuotaFromDB();
+    const activeServers = SERVERS.filter(s => s.quota.remainingApi > 0);
+    if (activeServers.length === 0) return null;
+    return activeServers.sort((a, b) => b.quota.remainingApi - a.quota.remainingApi)[0];
+}
+
+// Fungsi pilih server by ID
+async function getServerById(id) {
+    await loadQuotaFromDB();
+    return SERVERS.find(s => s.id === parseInt(id));
+}
+
+// ============================================
+// ROUTES
+// ============================================
+
 // Halaman utama
-app.get('/', (req, res) => {
+app.get('/', async (req, res) => {
+    await loadQuotaFromDB();
     res.json({
         status: 'ok',
         service: 'AMPrem Backend',
-        version: '5.0.0',
+        version: '6.0.0',
         servers: SERVERS.map(s => ({
             id: s.id,
             name: s.name,
@@ -122,7 +172,8 @@ app.get('/', (req, res) => {
 });
 
 // Endpoint cek kuota semua server
-app.get('/api/quota', (req, res) => {
+app.get('/api/quota', async (req, res) => {
+    await loadQuotaFromDB();
     res.json({
         success: true,
         servers: SERVERS.map(s => ({
@@ -150,7 +201,7 @@ app.post('/api/amprem', async (req, res) => {
     // Pilih server: manual atau otomatis
     let server;
     if (serverId) {
-        server = getServerById(serverId);
+        server = await getServerById(serverId);
         if (!server) {
             return res.json({ success: false, message: 'Server tidak ditemukan' });
         }
@@ -158,7 +209,7 @@ app.post('/api/amprem', async (req, res) => {
             return res.json({ success: false, message: `${server.name} kuota habis! Pilih server lain.` });
         }
     } else {
-        server = getBestServer();
+        server = await getBestServer();
     }
 
     if (!server) {
@@ -202,7 +253,7 @@ app.post('/api/amprem', async (req, res) => {
 
         const data = await response.json();
         
-        updateQuota(server, data);
+        await updateQuota(server, data);
 
         data.serverInfo = {
             id: server.id,
