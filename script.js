@@ -252,4 +252,4 @@ function showResult(data) {
 
 // Init
 loadQuota();
-setInterval(loadQuota, 30000); // Refresh tiap 30 detik
+setInterval(loadQuota, 5000); // Refresh tiap 30 detik
